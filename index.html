@@ -33,29 +33,20 @@
         var marker = L.marker([-34.6098069569562, -58.39274620522128]).addTo(map);
         
         marker.bindPopup("<b>¡Hola!</b><br>Acá se está debatiendo").openPopup();
-
-        // 5. Ejemplo de un círculo
-        var circle = L.circle([-34.61, -58.39], {
-            color: 'red',
-            fillColor: '#f03',
-            fillOpacity: 0.5,
-            radius: 500
-        }).addTo(map);
-fetch('glaciares.geojson') // El nombre exacto del archivo que subiste
+fetch('glaciares.geojson')
     .then(response => response.json())
     .then(data => {
         L.geoJSON(data, {
             style: function (feature) {
                 return {
-                    color: "blue",     // Color del borde
-                    weight: 2,         // Grosor
-                    fillOpacity: 0.5   // Transparencia del relleno
+                    color: "blue",     
+                    weight: 2,         
+                    fillOpacity: 0.5  
                 };
             },
             onEachFeature: function (feature, layer) {
-                // Si tu GeoJSON tiene una columna llamada "nombre", aparecerá al hacer clic
-                if (feature.properties && feature.properties.nombre) {
-                    layer.bindPopup(feature.properties.nombre);
+                if (feature.properties && feature.properties.fna) {
+                    layer.bindPopup(feature.properties.fna);
                 }
             }
         }).addTo(map);
