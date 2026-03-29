@@ -49,7 +49,7 @@
 </head>
 <body>
 
-    <div id="header">Mi Visualizador: GeoGlaciares</div>
+    <div id="header">GeoGlaciares: un visualizador de lo que se está debatiendo</div>
 
     <div id="main-container">
         <div id="sidebar">
@@ -79,7 +79,6 @@
             attribution: 'Map data &copy;2024 Google'
         });
 
-        // --- INICIALIZACIÓN DEL MAPA ---
         // Ajusté el zoom inicial a 5 para ver todo el país, centrado en el Congreso
         var map = L.map('map', {
             center: [-34.6098, -58.3927], 
@@ -116,8 +115,8 @@
                 L.geoJSON(data, {
                     style: { color: "red", weight: 2, fillOpacity: 0.5 },
                     onEachFeature: function (feature, layer) {
-                        if (feature.properties && feature.properties.gna) {
-                            layer.bindPopup("<b>Proyecto Minero:</b> " + feature.properties.gna);
+                        if (feature.properties && feature.properties.fna) {
+                            layer.bindPopup("<b>Proyecto Minero:</b> " + feature.properties.fna);
                         }
                     }
                 }).addTo(minasLayer);
