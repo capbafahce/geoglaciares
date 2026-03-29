@@ -52,7 +52,7 @@ L.control.layers(baseMaps).addTo(map);
 
         var marker = L.marker([-34.6098069569562, -58.39274620522128]).addTo(map);
         
-        marker.bindPopup("<b>¡Hola!</b><br>Acá se está debatiendo").openPopup();
+        marker.bindPopup("<b>¡Hola!</b><br>Acá se está debatiendo. Si querés ver lo que esta en juego, dirigite a la cordillera").openPopup();
 fetch('glaciares.geojson')
     .then(response => response.json())
     .then(data => {
