@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
     <style>
-        /* Definir el tamaño del mapa */
         #map {
             height: 100vh; /* Ocupa toda la altura de la ventana */
             width: 100%;
@@ -39,7 +38,7 @@ fetch('glaciares.geojson')
         L.geoJSON(data, {
             style: function (feature) {
                 return {
-                    color: "blue",     
+                    color: "red",     
                     weight: 2,         
                     fillOpacity: 0.5  
                 };
@@ -47,6 +46,25 @@ fetch('glaciares.geojson')
             onEachFeature: function (feature, layer) {
                 if (feature.properties && feature.properties.fna) {
                     layer.bindPopup(feature.properties.fna);
+                }
+            }
+        }).addTo(map);
+    })
+    .catch(error => console.error('Error cargando el GeoJSON:', error));
+        fetch('minas.geojson')
+    .then(response => response.json())
+    .then(data => {
+        L.geoJSON(data, {
+            style: function (feature) {
+                return {
+                    color: "red",     
+                    weight: 2,         
+                    fillOpacity: 0.5  
+                };
+            },
+            onEachFeature: function (feature, layer) {
+                if (feature.properties && feature.properties.gna) {
+                    layer.bindPopup(feature.properties.gna);
                 }
             }
         }).addTo(map);
