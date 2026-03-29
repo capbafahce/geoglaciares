@@ -6,68 +6,31 @@
     <title>GeoGlaciares</title>
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     
     <style>
         body { margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; font-family: sans-serif; }
-        
-        /* Barra superior */
-        #header {
-            height: 60px;
-            background: #2c3e50;
-            color: white;
-            display: flex;
-            align-items: center;
-            padding: 0 20px;
-            font-size: 24px;
-            font-weight: bold;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            z-index: 1000;
-        }
-
-        #main-container {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-        }
-
-        /* Panel lateral */
-        #sidebar {
-            width: 260px;
-            background: #f8f9fa;
-            border-right: 1px solid #ddd;
-            padding: 20px;
-            z-index: 999;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.05);
-        }
-
+        #header { height: 60px; background: #2c3e50; color: white; display: flex; align-items: center; padding: 0 20px; font-size: 24px; font-weight: bold; z-index: 1000; }
+        #main-container { display: flex; flex: 1; overflow: hidden; }
+        #sidebar { width: 260px; background: #f8f9fa; border-right: 1px solid #ddd; padding: 20px; z-index: 999; }
         #map { flex: 1; }
 
-        h3 { margin-top: 0; font-size: 18px; }
+        /* Estilo general para los iconos de Material Symbols en el mapa */
+        .custom-div-icon { background: none; border: none; }
         
-        /* Estilo de los controles de capa en el sidebar */
-        .layer-control {
-            margin-bottom: 15px;
-            padding: 10px;
-            background: white;
-            border: 1px solid #eee;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            cursor: pointer;
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            font-size: 28px;
+            text-shadow: 0 0 4px #000; /* Sombra negra para resaltar sobre el satélite */
         }
-        
+
+        /* Colores específicos */
+        .icon-glaciar { color: #00e5ff; } /* Cyan */
+        .icon-mina { color: #ff3d00; }    /* Rojo/Naranja fuerte */
+
+        .layer-control { margin-bottom: 15px; padding: 10px; background: white; border: 1px solid #eee; border-radius: 8px; display: flex; align-items: center; cursor: pointer; }
         .layer-control:hover { background: #f0f0f0; }
-        .layer-control input { margin-right: 12px; transform: scale(1.2); cursor: pointer; }
-        
-        /* Indicadores de color */
-        .legend-color {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 8px;
-            border: 1px solid rgba(0,0,0,0.2);
-        }
+        .layer-control input { margin-right: 12px; transform: scale(1.2); }
     </style>
 </head>
 <body>
@@ -81,20 +44,20 @@
             <div class="layer-control">
                 <label style="display: flex; align-items: center; cursor: pointer; width: 100%;">
                     <input type="checkbox" id="checkGlaciares" checked> 
-                    <span class="legend-color" style="background: cyan;"></span> Glaciares
+                    <span class="material-symbols-outlined icon-glaciar" style="font-size: 22px; margin-right: 8px;">ac_unit</span> Glaciares
                 </label>
             </div>
 
             <div class="layer-control">
                 <label style="display: flex; align-items: center; cursor: pointer; width: 100%;">
                     <input type="checkbox" id="checkMinas" checked> 
-                    <span class="legend-color" style="background: red;"></span> Proyectos Mineros
+                    <span class="material-symbols-outlined icon-mina" style="font-size: 22px; margin-right: 8px;">construction</span> Minas
                 </label>
             </div>
 
             <hr>
             <p style="font-size: 13px; color: #666;">
-                Visualizador de glaciares y proyectos mineros en discusión. Los puntos y áreas muestran la proximidad entre los recursos hídricos y la actividad extractiva.
+                Este visualizador permite analizar la ubicación de los glaciares frente a los proyectos mineros en territorio argentino.
             </p>
         </div>
         <div id="map"></div>
@@ -103,80 +66,57 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
-        // --- MAPAS BASE ---
-        var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
-        });
-
-        var googleSat = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
-            maxZoom: 20,
-            subdomains:['mt0','mt1','mt2','mt3'],
+        var googleSat = L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+            maxZoom: 20, subdomains:['mt0','mt1','mt2','mt3'],
             attribution: 'Map data &copy; Google'
         });
 
-        // Inicialización
-        var map = L.map('map', {
-            center: [-34.6098, -58.3927], 
-            zoom: 5,
-            layers: [googleSat]
-        });
+        var map = L.map('map', { center: [-45.0, -70.0], zoom: 4, layers: [googleSat] });
 
-        // Marcador Congreso
-        var marker = L.marker([-34.6098, -58.3927]).addTo(map);
-        marker.bindPopup("<b>¡Hola!</b><br>Acá se está debatiendo. Si querés ver lo que está en juego, dirigite a la cordillera.");
-
-        // --- CARGA DE CAPAS GEODATA ---
-
-        // Función genérica para cargar GeoJSON con estilo de puntos o polígonos
-        function cargarGeoJSON(url, grupo, color, propiedad) {
-            fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    L.geoJSON(data, {
-                        pointToLayer: function (feature, latlng) {
-                            return L.circleMarker(latlng, {
-                                radius: 6,
-                                fillColor: color,
-                                color: "#000",
-                                weight: 1,
-                                opacity: 1,
-                                fillOpacity: 0.8
-                            });
-                        },
-                        style: { color: color, weight: 2, fillOpacity: 0.5 },
-                        onEachFeature: function (feature, layer) {
-                            if (feature.properties && feature.properties[propiedad]) {
-                                layer.bindPopup("<b>Nombre:</b> " + feature.properties[propiedad]);
-                            }
-                        }
-                    }).addTo(grupo);
-                })
-                .catch(err => console.error('Error cargando ' + url, err));
-        }
-
-        // Grupos de capas
         var glaciaresLayer = L.layerGroup().addTo(map);
         var minasLayer = L.layerGroup().addTo(map);
 
-        // Cargar datos
-        cargarGeoJSON('glaciares.geojson', glaciaresLayer, 'cyan', 'fna');
-        cargarGeoJSON('minas.geojson', minasLayer, 'red', 'gna');
+        // --- CARGA DE GLACIARES (Icono: ac_unit) ---
+        fetch('glaciares.geojson')
+            .then(res => res.json())
+            .then(data => {
+                L.geoJSON(data, {
+                    pointToLayer: (feature, latlng) => L.marker(latlng, {
+                        icon: L.divIcon({
+                            className: 'custom-div-icon',
+                            html: '<span class="material-symbols-outlined icon-glaciar">ac_unit</span>',
+                            iconSize: [30, 30], iconAnchor: [15, 15]
+                        })
+                    }),
+                    style: { color: "#00e5ff", weight: 2, fillOpacity: 0.4 },
+                    onEachFeature: (f, l) => f.properties.fna && l.bindPopup("<b>Glaciar:</b> " + f.properties.fna)
+                }).addTo(glaciaresLayer);
+            });
 
-        // --- LÓGICA DE FILTROS LATERALES ---
-        document.getElementById('checkGlaciares').addEventListener('change', function(e) {
-            if (e.target.checked) map.addLayer(glaciaresLayer);
-            else map.removeLayer(glaciaresLayer);
-        });
+        // --- CARGA DE MINAS (Icono: construction) ---
+        fetch('minas.geojson')
+            .then(res => res.json())
+            .then(data => {
+                L.geoJSON(data, {
+                    pointToLayer: (feature, latlng) => L.marker(latlng, {
+                        icon: L.divIcon({
+                            className: 'custom-div-icon',
+                            html: '<span class="material-symbols-outlined icon-mina">construction</span>',
+                            iconSize: [30, 30], iconAnchor: [15, 15]
+                        })
+                    }),
+                    style: { color: "#ff3d00", weight: 2, fillOpacity: 0.4 },
+                    onEachFeature: (f, l) => f.properties.gna && l.bindPopup("<b>Proyecto Minero:</b> " + f.properties.gna)
+                }).addTo(minasLayer);
+            });
 
-        document.getElementById('checkMinas').addEventListener('change', function(e) {
-            if (e.target.checked) map.addLayer(minasLayer);
-            else map.removeLayer(minasLayer);
-        });
+        // Lógica de los Checkboxes
+        document.getElementById('checkGlaciares').onchange = (e) => e.target.checked ? map.addLayer(glaciaresLayer) : map.removeLayer(glaciaresLayer);
+        document.getElementById('checkMinas').onchange = (e) => e.target.checked ? map.addLayer(minasLayer) : map.removeLayer(minasLayer);
 
-        // Mantener también el control de capas original (opcional)
-        var baseMaps = { "Satélite": googleSat, "Calles": osm };
-        L.control.layers(baseMaps).addTo(map);
-
+    </script>
+</body>
+</html>
     </script>
 </body>
 </html>
