@@ -3,94 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GeoGlaciares: visualizador de lo que se está debatiendo</title>
+    <title>GeoGlaciares</title>
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
     <style>
-        #map {
-            height: 100vh; /* Ocupa toda la altura de la ventana */
-            width: 100%;
+        body { margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; font-family: sans-serif; }
+        
+        /* Barra superior */
+        #header {
+            height: 60px;
+            background: #2c3e50;
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            font-size: 24px;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 1000;
         }
-        body { margin: 0; padding: 0; }
+
+        #main-container {
+            display: flex;
+            flex: 1; /* Ocupa el resto de la pantalla */
+            overflow: hidden;
+        }
+
+        /* Panel lateral de filtros */
+        #sidebar {
+            width: 250px;
+            background: #f8f9fa;
+            border-right: 1px solid #ddd;
+            padding: 20px;
+            z-index: 999;
+        }
+
+        #map {
+            flex: 1; /* El mapa toma el espacio restante */
+        }
+
+        h3 { margin-top: 0; font-size: 18px; }
+        .filter-group { margin-bottom: 15px; }
     </style>
 </head>
 <body>
 
-    <div id="map"></div>
+    <div id="header">Mi Visualizador: GeoGlaciares</div>
+
+    <div id="main-container">
+        <div id="sidebar">
+            <h3>Capas y Filtros</h3>
+            <div class="filter-group">
+                <p>Usa el control arriba a la derecha en el mapa para alternar capas base y superpuestas.</p>
+            </div>
+            <hr>
+            <p style="font-size: 12px; color: #666;">
+                Visualizador de glaciares y proyectos mineros en discusión.
+            </p>
+        </div>
+        <div id="map"></div>
+    </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
+        // --- MAPAS BASE ---
+        var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        });
 
-        var map = L.map('map').setView([-34.6098069569562, -58.39274620522128], 500);
+        var googleSat = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+            maxZoom: 20,
+            subdomains:['mt0','mt1','mt2','mt3'],
+            attribution: 'Map data &copy;2024 Google'
+        });
 
-       // MAPAS BASE
+        // --- INICIALIZACIÓN DEL MAPA ---
+        // Ajusté el zoom inicial a 5 para ver todo el país, centrado en el Congreso
+        var map = L.map('map', {
+            center: [-34.6098, -58.3927], 
+            zoom: 5,
+            layers: [googleSat]
+        });
 
-var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors'
-});
+        // --- MARCADOR DEL DEBATE ---
+        var marker = L.marker([-34.6098, -58.3927]).addTo(map);
+        marker.bindPopup("<b>¡Hola!</b><br>Acá se está debatiendo. Si querés ver lo que está en juego, dirigite a la cordillera.").openPopup();
 
-var googleSat = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
-    maxZoom: 20,
-    subdomains:['mt0','mt1','mt2','mt3'],
-    attribution: 'Map data &copy;2024 Google'
-});
+        // --- CARGA DE CAPAS GEODATA ---
 
-// Inicializar el mapa con una de las capas
-var map = L.map('map', {
-    center: [-34.6037, -58.3816],
-    zoom: 13,
-    layers: [googleSat]
-});
+        // 1. Glaciares
+        var glaciaresLayer = L.layerGroup();
+        fetch('glaciares.geojson')
+            .then(response => response.json())
+            .then(data => {
+                L.geoJSON(data, {
+                    style: { color: "cyan", weight: 2, fillOpacity: 0.6 },
+                    onEachFeature: function (feature, layer) {
+                        if (feature.properties && feature.properties.fna) {
+                            layer.bindPopup("<b>Glaciar:</b> " + feature.properties.fna);
+                        }
+                    }
+                }).addTo(glaciaresLayer);
+            });
 
-var baseMaps = {
-    "OpenStreetMap": osm,
-    "Google Satélite": googleSat
-};
-L.control.layers(baseMaps).addTo(map);
-
-        var marker = L.marker([-34.6098069569562, -58.39274620522128]).addTo(map);
-        
-        marker.bindPopup("<b>¡Hola!</b><br>Acá se está debatiendo. Si querés ver lo que esta en juego, dirigite a la cordillera").openPopup();
-fetch('glaciares.geojson')
-    .then(response => response.json())
-    .then(data => {
-        L.geoJSON(data, {
-            style: function (feature) {
-                return {
-                    color: "red",     
-                    weight: 2,         
-                    fillOpacity: 0.5  
-                };
-            },
-            onEachFeature: function (feature, layer) {
-                if (feature.properties && feature.properties.fna) {
-                    layer.bindPopup(feature.properties.fna);
-                }
-            }
-        }).addTo(map);
-    })
-    .catch(error => console.error('Error cargando el GeoJSON:', error));
+        // 2. Minas
+        var minasLayer = L.layerGroup();
         fetch('minas.geojson')
-    .then(response => response.json())
-    .then(data => {
-        L.geoJSON(data, {
-            style: function (feature) {
-                return {
-                    color: "red",     
-                    weight: 2,         
-                    fillOpacity: 0.5  
-                };
-            },
-            onEachFeature: function (feature, layer) {
-                if (feature.properties && feature.properties.gna) {
-                    layer.bindPopup(feature.properties.gna);
-                }
-            }
-        }).addTo(map);
-    })
-    .catch(error => console.error('Error cargando el GeoJSON:', error));
+            .then(response => response.json())
+            .then(data => {
+                L.geoJSON(data, {
+                    style: { color: "red", weight: 2, fillOpacity: 0.5 },
+                    onEachFeature: function (feature, layer) {
+                        if (feature.properties && feature.properties.gna) {
+                            layer.bindPopup("<b>Proyecto Minero:</b> " + feature.properties.gna);
+                        }
+                    }
+                }).addTo(minasLayer);
+            });
+
+        // --- CONTROL DE CAPAS (Base y Superpuestas) ---
+        var baseMaps = {
+            "Google Satélite": googleSat,
+            "OpenStreetMap": osm
+        };
+
+        var overlayMaps = {
+            "Glaciares": glaciaresLayer,
+            "Proyectos Mineros": minasLayer
+        };
+
+        L.control.layers(baseMaps, overlayMaps).addTo(map);
+        
+        // Activar capas por defecto
+        glaciaresLayer.addTo(map);
+        minasLayer.addTo(map);
+
     </script>
 </body>
 </html>
