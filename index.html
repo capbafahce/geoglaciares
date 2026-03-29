@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizador GIS Básico</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <style>
+        /* Definir el tamaño del mapa */
+        #map {
+            height: 100vh; /* Ocupa toda la altura de la ventana */
+            width: 100%;
+        }
+        body { margin: 0; padding: 0; }
+    </style>
+</head>
+<body>
+
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        // 1. Inicializar el mapa centrado en una coordenada (Latitud, Longitud) y nivel de zoom
+        // Ejemplo: Buenos Aires [-34.6037, -58.3816]
+        var map = L.map('map').setView([-34.6037, -58.3816], 13);
+
+        // 2. Añadir capa de mapa base (OpenStreetMap)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // 3. Añadir un marcador
+        var marker = L.marker([-34.6037, -58.3816]).addTo(map);
+        
+        // 4. Añadir un popup al marcador
+        marker.bindPopup("<b>¡Hola!</b><br>Este es un punto en el mapa.").openPopup();
+
+        // 5. Ejemplo de un círculo
+        var circle = L.circle([-34.61, -58.39], {
+            color: 'red',
+            fillColor: '#f03',
+            fillOpacity: 0.5,
+            radius: 500
+        }).addTo(map);
+    </script>
+</body>
+</html>
