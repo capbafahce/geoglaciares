@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visualizador GIS Básico</title>
+    <title>GeoGlaciares: visualizador de lo que se está debatiendo</title>
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
@@ -23,20 +23,16 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
-        // 1. Inicializar el mapa centrado en una coordenada (Latitud, Longitud) y nivel de zoom
-        // Ejemplo: Buenos Aires [-34.6037, -58.3816]
-        var map = L.map('map').setView([-34.6037, -58.3816], 13);
 
-        // 2. Añadir capa de mapa base (OpenStreetMap)
+        var map = L.map('map').setView([-34.6098069569562, -58.39274620522128], 500);
+
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
-        // 3. Añadir un marcador
-        var marker = L.marker([-34.6037, -58.3816]).addTo(map);
+        var marker = L.marker([-34.6098069569562, -58.39274620522128]).addTo(map);
         
-        // 4. Añadir un popup al marcador
-        marker.bindPopup("<b>¡Hola!</b><br>Este es un punto en el mapa.").openPopup();
+        marker.bindPopup("<b>¡Hola!</b><br>Acá se está debatiendo").openPopup();
 
         // 5. Ejemplo de un círculo
         var circle = L.circle([-34.61, -58.39], {
@@ -45,6 +41,26 @@
             fillOpacity: 0.5,
             radius: 500
         }).addTo(map);
+fetch('glaciares.geojson') // El nombre exacto del archivo que subiste
+    .then(response => response.json())
+    .then(data => {
+        L.geoJSON(data, {
+            style: function (feature) {
+                return {
+                    color: "blue",     // Color del borde
+                    weight: 2,         // Grosor
+                    fillOpacity: 0.5   // Transparencia del relleno
+                };
+            },
+            onEachFeature: function (feature, layer) {
+                // Si tu GeoJSON tiene una columna llamada "nombre", aparecerá al hacer clic
+                if (feature.properties && feature.properties.nombre) {
+                    layer.bindPopup(feature.properties.nombre);
+                }
+            }
+        }).addTo(map);
+    })
+    .catch(error => console.error('Error cargando el GeoJSON:', error));
     </script>
 </body>
 </html>
