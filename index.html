@@ -85,10 +85,10 @@
                 
                 <!-- Selector de Estilo de Mapa -->
                 <div class="filter-control">
-                    <label for="selectMapaBase">🎨 Estilo del Mapa:</label>
+                    <label for="selectMapaBase">Mapa</label>
                     <select id="selectMapaBase">
-                        <option value="satelital">Vista Satelital Real</option>
-                        <option value="oscuro">Modo Oscuro (Radar Tech)</option>
+                        <option value="satelital">Satelital</option>
+                        <option value="oscuro">Modo Oscuro</option>
                     </select>
                 </div>
 
@@ -96,15 +96,15 @@
                 <div class="layer-control">
                     <label style="display: flex; align-items: center; cursor: pointer; width: 100%;">
                         <input type="checkbox" id="checkGlaciares" checked> 
-                        <span class="material-symbols-outlined icon-glaciar" style="margin-right: 8px;">layers</span> Cuerpos de Hielo (Polígonos)
+                        <span class="material-symbols-outlined icon-glaciar" style="margin-right: 8px;">layers</span> Cuerpos de Hielo
                     </label>
                 </div>
 
                 <!-- FILTRO POR PROVINCIA -->
                 <div class="filter-control">
-                    <label for="selectProvincia">🔍 Explorar por Provincia:</label>
+                    <label for="selectProvincia"> Explorar por provincia:</label>
                     <select id="selectProvincia">
-                        <option value="todas">-- Toda la Argentina --</option>
+                        <option value="todas">Toda la Argentina</option>
                     </select>
                 </div>
 
@@ -242,7 +242,7 @@
 
                     l.bindPopup(`
                         <div style="font-size: 13px; line-height: 1.5; width: 210px;">
-                            <b style="color:#cc0000; font-size:14px;">🔎 Ficha del Cuerpo de Hielo</b><br>
+                            <b style="color:#cc0000; font-size:14px;">Datos del cuerpo de hielo</b><br>
                             <hr style="margin: 5px 0; border: 0; border-top: 1px solid #ddd;">
                             <b>ID Registro:</b> ${idLocal}<br>
                             <b>Provincia:</b> ${provincia}<br>
