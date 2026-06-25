@@ -102,7 +102,7 @@
 
         // --- CARGA DE PROVINCIAS CON GLACIARES ---
         // Debes tener un archivo 'provincias_glaciares.geojson' en tu repo
-        fetch('provincias_glaciares.geojson')
+        fetch('glaciares_arg.geojson')
             .then(res => res.json())
             .then(data => {
                 L.geoJSON(data, {
