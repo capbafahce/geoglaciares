@@ -68,7 +68,7 @@
                 <div class="layer-control">
                     <label style="display: flex; align-items: center; cursor: pointer; width: 100%;">
                         <input type="checkbox" id="checkGlaciares" checked> 
-                        <span class="material-symbols-outlined icon-glaciar" style="margin-right: 8px;">ac_unit</span> Inventario de Glaciares
+                        <span class="material-symbols-outlined icon-glaciar" style="margin-right: 8px;">layers</span> Inventario de Glaciares
                     </label>
                 </div>
             </div>
@@ -106,14 +106,12 @@
             .then(data => {
                 L.geoJSON(data, {
                     style: {
-                        color: "#e67e22",
-                        weight: 2,
-                        dashArray: "4, 4", 
-                        fillOpacity: 0.05,
-                        fillColor: "#e67e22"
+                        color: "#e67e22",      // Color del borde del polígono (Naranja)
+                        weight: 2,             // Grosor del borde
+                        fillColor: "#e67e22",  // Color de relleno
+                        fillOpacity: 0.15      // Opacidad del relleno sutil para ver el satélite
                     },
                     onEachFeature: (f, l) => {
-                        // Adaptabilidad por si el campo de la provincia viene modificado en las propiedades
                         let provNombre = f.properties.Provincia || f.properties.provincia || f.properties.nam || "Provincia Cordillerana";
                         l.bindPopup(`<b>Provincia con presencia de hielo:</b> ${provNombre}`);
                     }
@@ -121,19 +119,19 @@
             })
             .catch(err => console.error("Error cargando glaciares_arg.json:", err));
 
-        // --- CARGA DEL INVENTARIO DE GLACIARES ---
+        // --- CARGA DEL INVENTARIO DE GLACIARES (POLÍGONOS REALES) ---
         fetch('glaciares_invent.json')
             .then(res => res.json())
             .then(data => {
                 L.geoJSON(data, {
                     style: { 
-                        color: "#00e5ff", 
-                        weight: 1, 
-                        fillColor: "#00e5ff", 
-                        fillOpacity: 0.6 
+                        color: "#00e5ff",      // Borde del polígono del glaciar (Cian)
+                        weight: 1.5,           // Grosor de la línea
+                        fillColor: "#00e5ff",  // Relleno
+                        fillOpacity: 0.6       // Opacidad para resaltar los cuerpos de hielo
                     },
                     onEachFeature: (f, l) => {
-                        // Extracción de datos reales del inventario para fines didácticos
+                        // Extracción de datos reales del inventario para los chicos del colegio
                         let provincia = f.properties.Provincia || "No especificada";
                         let cuenca = f.properties.Cuenca || "No especificada";
                         let area = f.properties.Area ? `${f.properties.Area} km²` : "Sin registrar";
