@@ -76,7 +76,7 @@
             <div>
                 <hr style="border: 0; border-top: 1px solid #ddd; margin: 15px 0;">
                 <p style="font-size: 12px; color: #666; line-height: 1.4;">
-                    Sabías que Argentina cuenta con un inventario de más de 178 mil cuerpos de hielo y nieve que protegen nuestras reservas estratégicas de agua hídrica.
+                    Sabías que Argentina cuenta con un inventario de más de 18 mil cuerpos de hielo y nieve que protegen nuestras reservas estratégicas de agua hídrica.
                 </p>
             </div>
         </div>
@@ -123,7 +123,7 @@
 
         // --- CARGA DE POLÍGONOS DE GLACIARES ---
         // Al ser miles de polígonos, optimizamos el peso visual (weight: 1)
-        fetch('glaciares.geojson')
+        fetch('glaciares_arg.geojson')
             .then(res => res.json())
             .then(data => {
                 L.geoJSON(data, {
