@@ -32,7 +32,7 @@
             transition: transform 0.4s ease;
         }
         .logo-pincha:hover {
-            transform: scale(1.1) rotate(5deg); /* Efecto interactivo al pasar el mouse */
+            transform: scale(1.1) rotate(5deg);
         }
         
         #main-container { display: flex; flex: 1; overflow: hidden; }
@@ -40,7 +40,7 @@
         #map { flex: 1; }
 
         /* Controles y Filtros */
-        .layer-control, .filter-control, .stats-box { margin-bottom: 15px; padding: 12px; background: white; border: 1px solid #eee; border-radius: 8px; }
+        .layer-control, .filter-control, .stats-box, .trivia-box { margin-bottom: 15px; padding: 12px; background: white; border: 1px solid #eee; border-radius: 8px; }
         .layer-control { display: flex; align-items: center; cursor: pointer; }
         .layer-control:hover { background: #f0f0f0; }
         .layer-control input { margin-right: 12px; transform: scale(1.2); }
@@ -53,11 +53,16 @@
         .stats-box h5 { margin: 0 0 8px 0; color: #00838f; font-size: 14px; display: flex; align-items: center; }
         .stats-num { font-weight: bold; color: #006064; font-size: 15px; }
 
+        /* Caja de Datos Curiosos Interactiva */
+        .trivia-box { background: #fff8e1; border: 1px solid #ffe082; }
+        .trivia-box h5 { margin: 0 0 6px 0; color: #b78103; font-size: 13px; display: flex; align-items: center; justify-content: space-between; }
+        .btn-trivia { background: none; border: none; cursor: pointer; color: #b78103; display: flex; align-items: center; padding: 2px; border-radius: 4px; }
+        .btn-trivia:hover { background: #fff3e0; }
+
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
             font-size: 24px;
         }
-        .icon-provincia { color: #e67e22; } 
         .icon-glaciar { color: #00e5ff; }   
     </style>
 </head>
@@ -78,6 +83,7 @@
                 
                 <h4 style="color: #333; margin-bottom: 10px;">Visualización</h4>
                 
+                <!-- Selector de Estilo de Mapa -->
                 <div class="filter-control">
                     <label for="selectMapaBase">🎨 Estilo del Mapa:</label>
                     <select id="selectMapaBase">
@@ -86,13 +92,7 @@
                     </select>
                 </div>
 
-                <div class="layer-control">
-                    <label style="display: flex; align-items: center; cursor: pointer; width: 100%;">
-                        <input type="checkbox" id="checkProvincias" checked> 
-                        <span class="material-symbols-outlined icon-provincia" style="margin-right: 8px;">map</span> Jurisdicciones con Glaciares
-                    </label>
-                </div>
-
+                <!-- Checkbox Glaciares -->
                 <div class="layer-control">
                     <label style="display: flex; align-items: center; cursor: pointer; width: 100%;">
                         <input type="checkbox" id="checkGlaciares" checked> 
@@ -100,6 +100,7 @@
                     </label>
                 </div>
 
+                <!-- FILTRO POR PROVINCIA -->
                 <div class="filter-control">
                     <label for="selectProvincia">🔍 Explorar por Provincia:</label>
                     <select id="selectProvincia">
@@ -107,10 +108,24 @@
                     </select>
                 </div>
 
+                <!-- TABLERO DE ESTADÍSTICAS EN VIVO -->
                 <div class="stats-box">
                     <h5><span class="material-symbols-outlined" style="font-size:20px; margin-right:5px;">analytics</span> Datos del área elegida:</h5>
                     <p style="margin: 4px 0; font-size: 13px; color:#455a64;">Glaciares registrados: <span id="txtCantidad" class="stats-num">0</span></p>
                     <p style="margin: 4px 0; font-size: 13px; color:#455a64;">Superficie total hídrica: <span id="txtAreaTotal" class="stats-num">0</span> km²</p>
+                </div>
+
+                <!-- CAJA DE DATOS CURIOSOS INTERACTIVA -->
+                <div class="trivia-box">
+                    <h5>
+                        <span style="display:flex; align-items:center;"><span class="material-symbols-outlined" style="font-size:18px; margin-right:4px;">lightbulb</span> ¿Sabías qué?</span>
+                        <button class="btn-trivia" id="btnSiguienteTrivia" title="Ver otro dato curioso">
+                            <span class="material-symbols-outlined" style="font-size:18px;">casino</span>
+                        </button>
+                    </h5>
+                    <p id="txtTrivia" style="margin: 5px 0 0 0; font-size: 12px; color: #5d4037; line-height: 1.4;">
+                        Cargando información científica de las reservas de hielo...
+                    </p>
                 </div>
             </div>
 
@@ -139,17 +154,33 @@
             subdomains: 'abcd', maxZoom: 20
         });
 
-        // Inicializamos el mapa con el fondo satelital por defecto
         var map = L.map('map', { center: [-42.0, -71.0], zoom: 5, layers: [googleSat] });
 
-        var provinciasLayer = L.layerGroup().addTo(map);
         var glaciaresLayer = L.layerGroup().addTo(map);
-
         var inventarioDataGlobal = null;
-
         var glaciarStyle = { color: "#00e5ff", weight: 1.5, fillColor: "#00e5ff", fillOpacity: 0.6 };
 
-        // Cambio interactivo de Mapa Base (Satelital / Oscuro)
+        // Banco de Datos Curiosos Escolares
+        var datosCuriosos = [
+            "Argentina cuenta con un registro oficial de más de 18.000 cuerpos de hielo a lo largo de los Andes.",
+            "¡No todo el hielo son glaciares de postal! Gran parte de nuestro inventario está formado por 'glaciares de escombros', que son cuerpos de hielo ocultos debajo de rocas.",
+            "Los glaciares actúan como 'tanques de agua naturales'. Sostienen el caudal de los ríos de la cordillera en las temporadas secas y de sequía extrema.",
+            "La provincia de Santa Cruz concentra la mayor superficie de hielo del país gracias a los Campos de Hielo Patagónicos.",
+            "Existen glaciares en zonas ágiles y secas del norte (como Jujuy o Salta) situados a más de 5.000 metros de altura, vitales para las comunidades locales.",
+            "El cambio climático provoca que la gran mayoría de los glaciares del mundo pierdan masa y retrocedan año a año de forma acelerada.",
+            "La Ley de Glaciares en Argentina (Ley 26.639) los protege estrictamente como reservas estratégicas de agua y prohíbe actividades como la minería sobre ellos."
+        ];
+
+        // Lógica de rotación de datos curiosos
+        function cambiarDatoCurioso() {
+            var indiceAleatorio = Math.floor(Math.random() * datosCuriosos.length);
+            document.getElementById('txtTrivia').innerText = datosCuriosos[indiceAleatorio];
+        }
+        
+        document.getElementById('btnSiguienteTrivia').onclick = cambiarDatoCurioso;
+        cambiarDatoCurioso(); // Inicial al cargar
+
+        // Cambio de Mapa Base
         document.getElementById('selectMapaBase').onchange = function(e) {
             if (e.target.value === "oscuro") {
                 map.removeLayer(googleSat);
@@ -159,20 +190,6 @@
                 map.addLayer(googleSat);
             }
         };
-
-        // --- CARGA DE PROVINCIAS ---
-        fetch('glaciares_arg.json')
-            .then(res => res.json())
-            .then(data => {
-                L.geoJSON(data, {
-                    style: { color: "#e67e22", weight: 2, fillColor: "#e67e22", fillOpacity: 0.12 },
-                    onEachFeature: (f, l) => {
-                        let provNombre = f.properties.provincia || f.properties.Provincia || f.properties.nam || "Provincia Cordillerana";
-                        l.bindPopup(`<b>Provincia con presencia de hielo:</b> ${provNombre}`);
-                    }
-                }).addTo(provinciasLayer);
-            })
-            .catch(err => console.error("Error cargando glaciares_arg.json:", err));
 
         // --- CARGA DEL INVENTARIO, FILTRO Y ESTADÍSTICAS ---
         fetch('glaciares_invent.json')
@@ -217,10 +234,10 @@
                     let lon = f.properties.Longitud || f.properties.longitud || 0;
                     let idLocal = f.properties.ID_local || f.properties.id_local || "S/D";
                     
-                    // --- TRADUCCIÓN DIDÁCTICA ---
+                    // Traducción didáctica a escala Estadio UNO
                     let cunaDeUno = areaNum > 0 ? (areaNum / 0.0071).toFixed(1) : "Calcular";
 
-                    // --- ENLACE DINÁMICO DE RETROCESO TEMPORAL ---
+                    // Enlace Google Earth Timelapse
                     let urlTimelapse = lat !== 0 ? `https://earth.google.com/web/@${lat},${lon},3000d,35y,0h,0t,0r` : "#";
 
                     l.bindPopup(`
@@ -250,7 +267,7 @@
             document.getElementById('txtAreaTotal').innerText = areaTotal.toLocaleString('es-AR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
         }
 
-        // Evento al cambiar el selector por provincia
+        // Evento del selector de provincia
         document.getElementById('selectProvincia').onchange = function(e) {
             var provinciaSeleccionada = e.target.value;
             
@@ -282,8 +299,7 @@
             if(!map.hasLayer(glaciaresLayer)) map.addLayer(glaciaresLayer);
         };
 
-        // Checkboxes de Visibilidad
-        document.getElementById('checkProvincias').onchange = (e) => e.target.checked ? map.addLayer(provinciasLayer) : map.removeLayer(provinciasLayer);
+        // Checkbox de Visibilidad de Glaciares
         document.getElementById('checkGlaciares').onchange = (e) => e.target.checked ? map.addLayer(glaciaresLayer) : map.removeLayer(glaciaresLayer);
 
     </script>
