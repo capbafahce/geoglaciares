@@ -24,6 +24,16 @@
             z-index: 1000;
             border-bottom: 4px solid #ffffff;
         }
+
+        /* Estilo para el logo del Pincha */
+        .logo-pincha {
+            height: 40px;
+            margin-right: 15px;
+            transition: transform 0.4s ease;
+        }
+        .logo-pincha:hover {
+            transform: scale(1.1) rotate(5deg); /* Efecto interactivo al pasar el mouse */
+        }
         
         #main-container { display: flex; flex: 1; overflow: hidden; }
         #sidebar { width: 280px; background: #f8f9fa; border-right: 1px solid #ddd; padding: 20px; z-index: 999; display: flex; flex-direction: column; justify-content: space-between; overflow-y: auto; }
@@ -54,6 +64,7 @@
 <body>
 
     <div id="header">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/e/ec/Estudiantes_de_La_Plata_logo.png" alt="Escudo EDLP" class="logo-pincha">
         GeoGlaciares: Inventario y Geografía de nuestros cuerpos de hielo
     </div>
 
@@ -68,7 +79,7 @@
                 <h4 style="color: #333; margin-bottom: 10px;">Visualización</h4>
                 
                 <div class="filter-control">
-                    <label for="selectMapaBase">Mapa base</label>
+                    <label for="selectMapaBase">🎨 Estilo del Mapa:</label>
                     <select id="selectMapaBase">
                         <option value="satelital">Vista Satelital Real</option>
                         <option value="oscuro">Modo Oscuro (Radar Tech)</option>
@@ -90,7 +101,7 @@
                 </div>
 
                 <div class="filter-control">
-                    <label for="selectProvincia">Provincia:</label>
+                    <label for="selectProvincia">🔍 Explorar por Provincia:</label>
                     <select id="selectProvincia">
                         <option value="todas">-- Toda la Argentina --</option>
                     </select>
@@ -197,7 +208,6 @@
             L.geoJSON(geoJsonData, {
                 style: glaciarStyle,
                 onEachFeature: (f, l) => {
-                    // Acumulamos el área del registro actual
                     let areaNum = parseFloat(f.properties.Area || f.properties.area || 0);
                     areaTotal += areaNum;
 
@@ -207,16 +217,15 @@
                     let lon = f.properties.Longitud || f.properties.longitud || 0;
                     let idLocal = f.properties.ID_local || f.properties.id_local || "S/D";
                     
-                    // --- TRADUCCIÓN DIDÁCTICA (Equivalencia con el Estadio Uno de Estudiantes) ---
-                    // 1 Cancha de fútbol profesional oficial con entorno promedio en km2 ronda los 0.0071 km²
+                    // --- TRADUCCIÓN DIDÁCTICA ---
                     let cunaDeUno = areaNum > 0 ? (areaNum / 0.0071).toFixed(1) : "Calcular";
 
-                    // --- ENLACE DINÁMICO DE RETROCESO TEMPORAL (Google Earth Timelapse) ---
+                    // --- ENLACE DINÁMICO DE RETROCESO TEMPORAL ---
                     let urlTimelapse = lat !== 0 ? `https://earth.google.com/web/@${lat},${lon},3000d,35y,0h,0t,0r` : "#";
 
                     l.bindPopup(`
                         <div style="font-size: 13px; line-height: 1.5; width: 210px;">
-                            <b style="color:#cc0000; font-size:14px;">Datos del cuerpo de hielo</b><br>
+                            <b style="color:#cc0000; font-size:14px;">🔎 Ficha del Cuerpo de Hielo</b><br>
                             <hr style="margin: 5px 0; border: 0; border-top: 1px solid #ddd;">
                             <b>ID Registro:</b> ${idLocal}<br>
                             <b>Provincia:</b> ${provincia}<br>
@@ -237,7 +246,6 @@
                 }
             }).addTo(glaciaresLayer);
 
-            // Impactamos los contadores vivos en las etiquetas del Sidebar
             document.getElementById('txtCantidad').innerText = cantidad.toLocaleString();
             document.getElementById('txtAreaTotal').innerText = areaTotal.toLocaleString('es-AR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
         }
