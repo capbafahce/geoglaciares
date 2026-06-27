@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Feria de de Ciencias - Colegio Estudiantes de La Plata</title>
+    <title>Feria de Ciencias - Colegio Estudiantes de La Plata</title>
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
@@ -11,28 +11,67 @@
     <style>
         body { margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; font-family: sans-serif; }
         
-        /* Header institucional - Colores de Estudiantes de La Plata (Rojo y Blanco) */
+        /* Header institucional - Altura flexible para albergar el subtítulo */
         #header { 
-            height: 60px; 
+            min-height: 70px; 
             background: #cc0000; 
             color: white; 
             display: flex; 
-            align-items: center; 
-            padding: 0 20px; 
-            font-size: 20px; 
-            font-weight: bold; 
+            align-items: center;
+            justify-content: space-between; /* Títulos a la izquierda, logos a la derecha */
+            padding: 10px 20px; 
             z-index: 1000;
             border-bottom: 4px solid #ffffff;
+            box-sizing: border-box;
         }
 
-        /* Estilo para el logo del Pincha */
-        .logo-pincha {
-            height: 40px;
-            margin-right: 15px;
-            transition: transform 0.4s ease;
+        /* Contenedor de títulos (Principal + Subtítulo) */
+        .header-titulos {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            max-width: 70%; /* Evita que el texto invada el espacio de los logos */
         }
-        .logo-pincha:hover {
-            transform: scale(1.1) rotate(5deg);
+
+        .header-titulo-principal {
+            font-size: 19px; 
+            font-weight: bold;
+        }
+
+        .header-subtitulo {
+            font-size: 12.5px;
+            font-weight: normal;
+            text-align: justify;
+            line-height: 1.3;
+            opacity: 0.95;
+        }
+
+        /* Contenedor para alinear los logos */
+        .logos-container {
+            display: flex;
+            align-items: center;
+            flex-shrink: 0; /* Evita que los logos se achiquen si el texto es largo */
+        }
+
+        /* Estilo unificado para los logos institucionales */
+        .logo-header {
+            height: 40px;
+            transition: transform 0.4s ease;
+            margin-right: 15px; /* Espaciado por defecto entre los logos */
+        }
+        
+        /* Ajuste específico: reducimos al mínimo el espacio entre el 1° (IdIHCS) y el 2° (CIG) */
+        .logos-container img:nth-child(1) {
+            margin-right: 4px; 
+        }
+
+        /* El último logo (Estudiantes) no necesita margen derecho */
+        .logos-container img:last-child {
+            margin-right: 0;
+        }
+
+        .logo-header:hover {
+            transform: scale(1.1) rotate(3deg);
         }
         
         #main-container { display: flex; flex: 1; overflow: hidden; }
@@ -68,22 +107,29 @@
 </head>
 <body>
 
-  <div id="header">
-    <img src="estudiantes_logo.png" alt="Escudo EDLP" class="logo-pincha">
-    Feria de Ciencias | Glaciares: inventario de nuestros cuerpos de hielo
-</div>
+    <div id="header">
+        <div class="header-titulos">
+            <div class="header-titulo-principal">Feria de Ciencias | Glaciares: inventario de nuestros cuerpos de hielo</div>
+            <div class="header-subtitulo">
+                Proyecto I+D: "Conflictos Ambientales en la Provincia de Buenos Aires: Lineamientos desde la Gestión Ambiental y del Riesgo (2000 - 2028)". H1090
+            </div>
+        </div>
+        
+        <div class="logos-container">
+            <img src="idihcs_logo.png" alt="Logo IdIHCS" class="logo-header">
+            <img src="cig_logo.png" alt="Logo CIG" class="logo-header">
+            <img src="estudiantes_logo.png" alt="Escudo EDLP" class="logo-header">
+        </div>
+    </div>
 
     <div id="main-container">
         <div id="sidebar">
             <div>
-                <h3 style="margin-top: 0; color: #2c3e50; margin-bottom: 2px;">Proyecto I+D: "Conflictos Ambientales en la Provincia de Buenos Aires: Lineamientos desde la Gestión Ambiental y del Riesgo (2000 - 2028)". H1090</h3>
-                <p style="font-size: 13px; color: #cc0000; font-weight: bold; margin-top: 0; margin-bottom: 15px;">UNLP - FaHCE - IdIHCS - CIG - CONICET - Colegio Estudiantes de La Plata (DIEGEP 7701)</p>
-                
+                            
                 <hr style="border: 0; border-top: 1px solid #ddd; margin: 15px 0;">
                 
                 <h4 style="color: #333; margin-bottom: 10px;">Visualización</h4>
                 
-                <!-- Selector de Estilo de Mapa -->
                 <div class="filter-control">
                     <label for="selectMapaBase">Mapa</label>
                     <select id="selectMapaBase">
@@ -92,7 +138,6 @@
                     </select>
                 </div>
 
-                <!-- Checkbox Glaciares -->
                 <div class="layer-control">
                     <label style="display: flex; align-items: center; cursor: pointer; width: 100%;">
                         <input type="checkbox" id="checkGlaciares" checked> 
@@ -100,7 +145,6 @@
                     </label>
                 </div>
 
-                <!-- FILTRO POR PROVINCIA -->
                 <div class="filter-control">
                     <label for="selectProvincia">Explorar por provincia:</label>
                     <select id="selectProvincia">
@@ -108,14 +152,12 @@
                     </select>
                 </div>
 
-                <!-- TABLERO DE ESTADÍSTICAS EN VIVO -->
                 <div class="stats-box">
                     <h5><span class="material-symbols-outlined" style="font-size:20px; margin-right:5px;">analytics</span> Datos del área elegida:</h5>
                     <p style="margin: 4px 0; font-size: 13px; color:#455a64;">Glaciares registrados: <span id="txtCantidad" class="stats-num">0</span></p>
                     <p style="margin: 4px 0; font-size: 13px; color:#455a64;">Superficie total hídrica: <span id="txtAreaTotal" class="stats-num">0</span> km²</p>
                 </div>
 
-                <!-- CAJA DE DATOS CURIOSOS INTERACTIVA -->
                 <div class="trivia-box">
                     <h5>
                         <span style="display:flex; align-items:center;"><span class="material-symbols-outlined" style="font-size:18px; margin-right:4px;">lightbulb</span> ¿Sabías qué?</span>
@@ -130,9 +172,13 @@
             </div>
 
             <div>
-                <hr style="border: 0; border-top: 1px solid #ddd; margin: 15px 0;">
-                <p style="font-size: 11px; color: #666; line-height: 1.4; margin: 0;">
+                <hr style="border: 0; border-top: 1px solid #ddd; margin: 12px 0;">
+                <p style="font-size: 11px; color: #666; line-height: 1.4; margin-bottom: 10px;">
                     <b>¡Reto de Ciencia!</b> Hacé clic en cualquier cuerpo de hielo para calcular a cuántas canchas del Estadio de UNO equivale su tamaño y ver el time-lapse de su retroceso ambiental.
+                </p>
+                <hr style="border: 0; border-top: 1px solid #ddd; margin-bottom: 8px;">
+                <p style="font-size: 9.5px; color: #7f8c8d; line-height: 1.3; text-align: center; margin: 0;">
+                    <b></b> UNLP - FaHCE - IdIHCS - CIG - CONICET - Colegio Estudiantes de La Plata (DIEGEP 7701)</i>.
                 </p>
             </div>
         </div>
@@ -154,20 +200,38 @@
             subdomains: 'abcd', maxZoom: 20
         });
 
-        var map = L.map('map', { center: [-42.0, -71.0], zoom: 5, layers: [googleSat] });
+        // Límites geográficos máximos para recortar la vista oceánica (Foco en el continente)
+        var limitesMapa = [
+            [-56.0, -76.0], // Esquina Suroeste
+            [-21.0, -62.0]  // Esquina Noreste
+        ];
+
+        var map = L.map('map', { 
+            center: [-42.0, -71.0], 
+            zoom: 5, 
+            layers: [googleSat],
+            maxBounds: limitesMapa,
+            maxBoundsViscosity: 1.0,
+            minZoom: 4
+        });
 
         var glaciaresLayer = L.layerGroup().addTo(map);
         var inventarioDataGlobal = null;
         var glaciarStyle = { color: "#00e5ff", weight: 1.5, fillColor: "#00e5ff", fillOpacity: 0.6 };
 
-        // Banco de Datos Curiosos Escolares
+        // Banco de Datos Curiosos Escolares expandido con datos extraídos del Atlas
         var datosCuriosos = [
             "Argentina cuenta con un registro oficial de más de 18.000 cuerpos de hielo a lo largo de los Andes.",
             "El Instituto Argentino de Nivología, Glaciología y Ciencias Ambientales (IANIGLA) tiene la importante misión de realizar y actualizar el Inventario Nacional de Glaciares.",
             "La provincia de Santa Cruz concentra la mayor superficie de hielo del país gracias al Campo de Hielo Patagónico Sur.",
             "Existen glaciares en zonas secas del norte (como Jujuy o Salta) situados a más de 5.000 metros de altura.",
             "El cambio climático provoca que la gran mayoría de los glaciares del mundo pierdan masa y retrocedan año a año de forma acelerada.",
-            "La Ley de Glaciares en Argentina (Ley 26.639) los protege estrictamente como reservas estratégicas de agua y prohíbe actividades como la minería sobre ellos."
+            "La Ley de Glaciares en Argentina (Ley 26.639) los protege estrictamente como reservas estratégicas de agua y prohíbe actividades como la minería sobre ellos.",
+            "La región de los Andes Desérticos presenta condiciones de extrema aridez, lo que limita la formación de hielo a pequeños parches en los picos más altos.",
+            "Las condiciones áridas hacen que los glaciares de escombros cobren gran importancia en el norte, ya que las rocas protegen el hielo de la radiación.",
+            "La región de los Andes Centrales concentra una enorme superficie de glaciares descubiertos (más de 680 km²) y de glaciares de escombros activos.",
+            "En los Andes del Norte de la Patagonia la cordillera pierde altura, pero las intensas lluvias del Pacífico permiten mantener importantes masas de hielo.",
+            "El glaciar Ventisquero Negro en Río Negro es un gran ejemplo de glaciar cubierto; los detritos rocosos en su superficie le dan ese color oscuro."
         ];
 
         // Lógica de rotación de datos curiosos
@@ -230,7 +294,7 @@
                     let provincia = f.properties.provincia || f.properties.Provincia || "No especificada";
                     let cuenca = f.properties.Cuenca || f.properties.cuenca || "No especificada";
                     let lat = f.properties.Latitud || f.properties.latitud || 0;
-                    let lon = f.properties.Longitud || f.properties.longitud || 0;
+                    let lon = f.properties.longitud || f.properties.Longitud || f.properties.lon || 0;
                     let idLocal = f.properties.ID_local || f.properties.id_local || "S/D";
                     
                     // Traducción didáctica a escala Estadio UNO
