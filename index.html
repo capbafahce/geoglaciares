@@ -11,26 +11,25 @@
     <style>
         body { margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; font-family: sans-serif; }
         
-        /* Header institucional - Altura flexible para albergar el subtítulo */
+        /* Header institucional */
         #header { 
             min-height: 70px; 
             background: #cc0000; 
             color: white; 
             display: flex; 
             align-items: center;
-            justify-content: space-between; /* Títulos a la izquierda, logos a la derecha */
+            justify-content: space-between;
             padding: 10px 20px; 
             z-index: 1000;
             border-bottom: 4px solid #ffffff;
             box-sizing: border-box;
         }
 
-        /* Contenedor de títulos (Principal + Subtítulo) */
         .header-titulos {
             display: flex;
             flex-direction: column;
             gap: 4px;
-            max-width: 70%; /* Evita que el texto invada el espacio de los logos */
+            max-width: 70%;
         }
 
         .header-titulo-principal {
@@ -46,37 +45,29 @@
             opacity: 0.95;
         }
 
-        /* Contenedor para alinear los logos */
         .logos-container {
             display: flex;
             align-items: center;
-            flex-shrink: 0; /* Evita que los logos se achiquen si el texto es largo */
+            flex-shrink: 0;
         }
 
-        /* Estilo unificado para los logos institucionales */
         .logo-header {
             height: 40px;
             transition: transform 0.4s ease;
-            margin-right: 15px; /* Espaciado por defecto entre los logos */
+            margin-right: 15px;
         }
         
-        /* Ajuste específico: reducimos al mínimo el espacio entre el 1° (IdIHCS) y el 2° (CIG) */
-        .logos-container img:nth-child(1) {
-            margin-right: 4px; 
-        }
-
-        /* El último logo (Estudiantes) no necesita margen derecho */
-        .logos-container img:last-child {
-            margin-right: 0;
-        }
-
-        .logo-header:hover {
-            transform: scale(1.1) rotate(3deg);
-        }
+        .logos-container img:nth-child(1) { margin-right: 4px; }
+        .logos-container img:last-child { margin-right: 0; }
+        .logo-header:hover { transform: scale(1.1) rotate(3deg); }
         
-        #main-container { display: flex; flex: 1; overflow: hidden; }
+        #main-container { display: flex; flex: 1; overflow: hidden; position: relative; }
         #sidebar { width: 280px; background: #f8f9fa; border-right: 1px solid #ddd; padding: 20px; z-index: 999; display: flex; flex-direction: column; justify-content: space-between; overflow-y: auto; }
-        #map { flex: 1; }
+        #map-container { flex: 1; position: relative; height: 100%; }
+        #map { width: 100%; height: 100%; }
+        
+        /* Estilo de cursor al medir */
+        .medicion-activa { cursor: crosshair !important; }
 
         /* Controles y Filtros */
         .layer-control, .filter-control, .stats-box, .trivia-box { margin-bottom: 15px; padding: 12px; background: white; border: 1px solid #eee; border-radius: 8px; }
@@ -87,12 +78,10 @@
         .filter-control label { display: block; font-size: 13px; font-weight: bold; color: #2c3e50; margin-bottom: 5px; }
         .filter-control select { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc; font-size: 14px; background-color: #fff; cursor: pointer; }
 
-        /* Tablero de Estadísticas Escolares */
         .stats-box { background: #eefafc; border: 1px solid #b2ebf2; }
         .stats-box h5 { margin: 0 0 8px 0; color: #00838f; font-size: 14px; display: flex; align-items: center; }
         .stats-num { font-weight: bold; color: #006064; font-size: 15px; }
 
-        /* Caja de Datos Curiosos Interactiva */
         .trivia-box { background: #fff8e1; border: 1px solid #ffe082; }
         .trivia-box h5 { margin: 0 0 6px 0; color: #b78103; font-size: 13px; display: flex; align-items: center; justify-content: space-between; }
         .btn-trivia { background: none; border: none; cursor: pointer; color: #b78103; display: flex; align-items: center; padding: 2px; border-radius: 4px; }
@@ -102,7 +91,105 @@
             font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
             font-size: 24px;
         }
-        .icon-glaciar { color: #00e5ff; }   
+        .icon-glaciar { color: #00e5ff; }
+
+        /* BARRA LATERAL DE HERRAMIENTAS FLOTANTE - ESTILO EDLP */
+        .map-toolbar {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1001;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+        }
+
+        /* Grupo de Zoom (Fondo Blanco, Icono Rojo Pincha) */
+        .zoom-group {
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            border-radius: 50px;
+            overflow: hidden;
+            background-color: white;
+            border: 2px solid #cc0000;
+        }
+
+        .btn-toolbar-zoom {
+            width: 42px;
+            height: 42px;
+            background: transparent;
+            color: #cc0000;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .btn-toolbar-zoom:hover { background-color: #cc0000; color: white; }
+        .btn-toolbar-zoom:first-child { border-bottom: 1px solid #eeeeee; }
+
+        /* Botones de acción generales (Fondo Rojo, Iconos Blancos) */
+        .btn-toolbar-action {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 2px solid #ffffff;
+            background-color: #cc0000;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+            transition: transform 0.2s, background-color 0.2s;
+            position: relative;
+        }
+        .btn-toolbar-action:hover { transform: scale(1.1); background-color: #a30000; }
+        
+        /* Estado activo para el botón de medición */
+        .btn-toolbar-action.active {
+            background-color: #34495e;
+            border-color: #34495e;
+        }
+
+        /* Submenú desplegable para los mapas base */
+        .basemap-menu {
+            position: absolute;
+            right: 55px;
+            top: 0;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: none;
+            flex-direction: column;
+            padding: 6px 0;
+            width: 130px;
+        }
+        .basemap-option {
+            padding: 10px 14px;
+            font-size: 13px;
+            color: #2c3e50;
+            cursor: pointer;
+            text-align: left;
+            font-weight: bold;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .basemap-option:hover { background-color: #fcebeb; color: #cc0000; }
+        
+        /* Estilos para el tooltip de medición flotante */
+        .medicion-tooltip {
+            background: #34495e;
+            border: 1px solid #2c3e50;
+            color: white;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+        }
     </style>
 </head>
 <body>
@@ -125,19 +212,9 @@
     <div id="main-container">
         <div id="sidebar">
             <div>
-                            
-                <hr style="border: 0; border-top: 1px solid #ddd; margin: 15px 0;">
+                <h4 style="color: #333; margin-top: 5px; margin-bottom: 10px;">Visualización</h4>
                 
-                <h4 style="color: #333; margin-bottom: 10px;">Visualización</h4>
-                
-                <div class="filter-control">
-                    <label for="selectMapaBase">Mapa</label>
-                    <select id="selectMapaBase">
-                        <option value="satelital">Satelital</option>
-                        <option value="oscuro">Modo Oscuro</option>
-                    </select>
-                </div>
-
+                <!-- Checkbox Glaciares -->
                 <div class="layer-control">
                     <label style="display: flex; align-items: center; cursor: pointer; width: 100%;">
                         <input type="checkbox" id="checkGlaciares" checked> 
@@ -145,6 +222,7 @@
                     </label>
                 </div>
 
+                <!-- FILTRO POR PROVINCIA -->
                 <div class="filter-control">
                     <label for="selectProvincia">Explorar por provincia:</label>
                     <select id="selectProvincia">
@@ -152,12 +230,14 @@
                     </select>
                 </div>
 
+                <!-- TABLERO DE ESTADÍSTICAS EN VIVO -->
                 <div class="stats-box">
                     <h5><span class="material-symbols-outlined" style="font-size:20px; margin-right:5px;">analytics</span> Datos del área elegida:</h5>
                     <p style="margin: 4px 0; font-size: 13px; color:#455a64;">Glaciares registrados: <span id="txtCantidad" class="stats-num">0</span></p>
                     <p style="margin: 4px 0; font-size: 13px; color:#455a64;">Superficie total hídrica: <span id="txtAreaTotal" class="stats-num">0</span> km²</p>
                 </div>
 
+                <!-- CAJA DE DATOS CURIOSOS INTERACTIVA -->
                 <div class="trivia-box">
                     <h5>
                         <span style="display:flex; align-items:center;"><span class="material-symbols-outlined" style="font-size:18px; margin-right:4px;">lightbulb</span> ¿Sabías qué?</span>
@@ -176,14 +256,45 @@
                 <p style="font-size: 11px; color: #666; line-height: 1.4; margin-bottom: 10px;">
                     <b>¡Reto de Ciencia!</b> Hacé clic en cualquier cuerpo de hielo para calcular a cuántas canchas del Estadio de UNO equivale su tamaño y ver el time-lapse de su retroceso ambiental.
                 </p>
-                <hr style="border: 0; border-top: 1px solid #ddd; margin-bottom: 8px;">
+                <hr style="border: 0; border-top: 1px solid #ddd; margin-bottom: 12px;">
+                
+                <!-- TEXTO REUBICADO JUNTO A LA FUENTE -->
+                <p style="font-size: 11px; color: #cc0000; font-weight: bold; margin: 0 0 10px 0; text-align: center; line-height: 1.3;">
+                    UNLP - FaHCE - IdIHCS - CIG - CONICET -<br>Colegio Estudiantes de La Plata (DIEGEP 7701)
+                </p>
+                
                 <p style="font-size: 9.5px; color: #7f8c8d; line-height: 1.3; text-align: center; margin: 0;">
-                    <b></b> UNLP - FaHCE - IdIHCS - CIG - CONICET - Colegio Estudiantes de La Plata (DIEGEP 7701)</i>.
+                    📚 <b>Fuente:</b> Secretaría de Gobierno de Ambiente y Desarrollo Sustentable de la Nación e IANIGLA-CONICET (2019). <i>Atlas de Glaciares de la Argentina</i>.
                 </p>
             </div>
         </div>
         
-        <div id="map"></div>
+        <div id="map-container">
+            <!-- BARRA DE HERRAMIENTAS FLOTANTE DEPURADA -->
+            <div class="map-toolbar">
+                <!-- Controles de Zoom -->
+                <div class="zoom-group">
+                    <button class="btn-toolbar-zoom" id="btn-zoom-in" title="Acercar"><span class="material-symbols-outlined">add</span></button>
+                    <button class="btn-toolbar-zoom" id="btn-zoom-out" title="Alejar"><span class="material-symbols-outlined">remove</span></button>
+                </div>
+                
+                <!-- Cambiar Mapa Base -->
+                <button class="btn-toolbar-action" id="btn-basemap" title="Cambiar Mapa Base">
+                    <span class="material-symbols-outlined">map</span>
+                    <div class="basemap-menu" id="menu-basemaps">
+                        <div class="basemap-option" data-value="satelital">Satelital</div>
+                        <div class="basemap-option" data-value="oscuro">Modo Oscuro</div>
+                    </div>
+                </button>
+                
+                <!-- Regla de Medición Interactiva -->
+                <button class="btn-toolbar-action" id="btn-measure" title="Medir distancia de punto a punto">
+                    <span class="material-symbols-outlined">straighten</span>
+                </button>
+            </div>
+
+            <div id="map"></div>
+        </div>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -200,10 +311,9 @@
             subdomains: 'abcd', maxZoom: 20
         });
 
-        // Límites geográficos máximos para recortar la vista oceánica (Foco en el continente)
         var limitesMapa = [
-            [-56.0, -76.0], // Esquina Suroeste
-            [-21.0, -62.0]  // Esquina Noreste
+            [-56.0, -76.0], 
+            [-21.0, -62.0]  
         ];
 
         var map = L.map('map', { 
@@ -212,49 +322,141 @@
             layers: [googleSat],
             maxBounds: limitesMapa,
             maxBoundsViscosity: 1.0,
-            minZoom: 4
+            minZoom: 4,
+            zoomControl: false 
         });
 
+        // Eventos barra flotante básicos
+        document.getElementById('btn-zoom-in').onclick = function() { map.zoomIn(); };
+        document.getElementById('btn-zoom-out').onclick = function() { map.zoomOut(); };
+
+        // Desplegable de mapas base
+        var btnBasemap = document.getElementById('btn-basemap');
+        var menuBasemaps = document.getElementById('menu-basemaps');
+
+        btnBasemap.onclick = function(e) {
+            e.stopPropagation();
+            var estaAbierto = menuBasemaps.style.display === 'flex';
+            menuBasemaps.style.display = estaAbierto ? 'none' : 'flex';
+        };
+
+        document.addEventListener('click', function() {
+            menuBasemaps.style.display = 'none';
+        });
+
+        var opcionesMapa = document.getElementsByClassName('basemap-option');
+        for (var i = 0; i < opcionesMapa.length; i++) {
+            opcionesMapa[i].onclick = function(e) {
+                var valorSeleccionado = this.getAttribute('data-value');
+                if (valorSeleccionado === "oscuro") {
+                    map.removeLayer(googleSat);
+                    map.addLayer(cartoDark);
+                } else {
+                    map.removeLayer(cartoDark);
+                    map.addLayer(googleSat);
+                }
+            };
+        }
+
+        // --- LÓGICA DE LA REGLA DE MEDICIÓN NATIVA ---
+        var modoMedicionActivo = false;
+        var puntosMedicion = [];
+        var lineaMedicion = null;
+        var marcadoresMedicion = [];
+        var tooltipFlotante = null;
+        var btnMeasure = document.getElementById('btn-measure');
+
+        btnMeasure.onclick = function(e) {
+            e.stopPropagation();
+            modoMedicionActivo = !modoMedicionActivo;
+
+            if (modoMedicionActivo) {
+                btnMeasure.classList.add('active');
+                document.getElementById('map').classList.add('medicion-activa');
+                map.on('click', mapearClicMedicion);
+            } else {
+                finalizarYLimpiarMedicion();
+            }
+        };
+
+        function mapearClicMedicion(e) {
+            var latlng = e.latlng;
+            puntosMedicion.push(latlng);
+
+            // Crear un pequeño marcador circular en el punto cliqueado
+            var marcador = L.circleMarker(latlng, {
+                radius: 4,
+                color: '#2c3e50',
+                fillColor: '#ffffff',
+                fillOpacity: 1,
+                weight: 2
+            }).addTo(map);
+            marcadoresMedicion.push(marcador);
+
+            if (puntosMedicion.length > 1) {
+                if (!lineaMedicion) {
+                    lineaMedicion = L.polyline(puntosMedicion, { color: '#cc0000', weight: 3, dashArray: '5, 5' }).addTo(map);
+                } else {
+                    lineaMedicion.setLatLngs(puntosMedicion);
+                }
+
+                // Calcular la distancia acumulada total usando la fórmula geodésica integrada de Leaflet
+                var distanciaTotalMetros = 0;
+                for (var i = 0; i < puntosMedicion.length - 1; i++) {
+                    distanciaTotalMetros += puntosMedicion[i].distanceTo(puntosMedicion[i+1]);
+                }
+                var distanciaKm = (distanciaTotalMetros / 1000).toFixed(2);
+
+                // Actualizar o crear tooltip flotante en el último vértice insertado
+                if (!tooltipFlotante) {
+                    tooltipFlotante = L.tooltip({
+                        permanent: true,
+                        direction: 'top',
+                        className: 'medicion-tooltip',
+                        offset: [0, -5]
+                    });
+                }
+                tooltipFlotante.setLatLng(latlng).setContent("Distancia: " + distanciaKm + " km").addTo(map);
+            }
+        }
+
+        function finalizarYLimpiarMedicion() {
+            modoMedicionActivo = false;
+            btnMeasure.classList.remove('active');
+            document.getElementById('map').classList.remove('medicion-activa');
+            
+            map.off('click', mapearClicMedicion);
+
+            if (lineaMedicion) { map.removeLayer(lineaMedicion); lineaMedicion = null; }
+            if (tooltipFlotante) { map.removeLayer(tooltipFlotante); tooltipFlotante = null; }
+            marcadoresMedicion.forEach(m => map.removeLayer(m));
+            marcadoresMedicion = [];
+            puntosMedicion = [];
+        }
+
+
+        // --- CARGA DEL INVENTARIO, FILTRO Y ESTADÍSTICAS ---
         var glaciaresLayer = L.layerGroup().addTo(map);
         var inventarioDataGlobal = null;
         var glaciarStyle = { color: "#00e5ff", weight: 1.5, fillColor: "#00e5ff", fillOpacity: 0.6 };
 
-        // Banco de Datos Curiosos Escolares expandido con datos extraídos del Atlas
         var datosCuriosos = [
             "Argentina cuenta con un registro oficial de más de 18.000 cuerpos de hielo a lo largo de los Andes.",
             "El Instituto Argentino de Nivología, Glaciología y Ciencias Ambientales (IANIGLA) tiene la importante misión de realizar y actualizar el Inventario Nacional de Glaciares.",
             "La provincia de Santa Cruz concentra la mayor superficie de hielo del país gracias al Campo de Hielo Patagónico Sur.",
             "Existen glaciares en zonas secas del norte (como Jujuy o Salta) situados a más de 5.000 metros de altura.",
             "El cambio climático provoca que la gran mayoría de los glaciares del mundo pierdan masa y retrocedan año a año de forma acelerada.",
-            "La Ley de Glaciares en Argentina (Ley 26.639) los protege estrictamente como reservas estratégicas de agua y prohíbe actividades como la minería sobre ellos.",
-            "La región de los Andes Desérticos presenta condiciones de extrema aridez, lo que limita la formación de hielo a pequeños parches en los picos más altos.",
-            "Las condiciones áridas hacen que los glaciares de escombros cobren gran importancia en el norte, ya que las rocas protegen el hielo de la radiación.",
-            "La región de los Andes Centrales concentra una enorme superficie de glaciares descubiertos (más de 680 km²) y de glaciares de escombros activos.",
-            "En los Andes del Norte de la Patagonia la cordillera pierde altura, pero las intensas lluvias del Pacífico permiten mantener importantes masas de hielo.",
-            "El glaciar Ventisquero Negro en Río Negro es un gran ejemplo de glaciar cubierto; los detritos rocosos en su superficie le dan ese color oscuro."
+            "La Ley de Glaciares en Argentina (Ley 26.639) los protege estrictamente como reservas estratégicas de agua y prohíbe actividades como la minería sobre ellos."
         ];
 
-        // Lógica de rotación de datos curiosos
         function cambiarDatoCurioso() {
             var indiceAleatorio = Math.floor(Math.random() * datosCuriosos.length);
             document.getElementById('txtTrivia').innerText = datosCuriosos[indiceAleatorio];
         }
         
         document.getElementById('btnSiguienteTrivia').onclick = cambiarDatoCurioso;
-        cambiarDatoCurioso(); // Inicial al cargar
+        cambiarDatoCurioso();
 
-        // Cambio de Mapa Base
-        document.getElementById('selectMapaBase').onchange = function(e) {
-            if (e.target.value === "oscuro") {
-                map.removeLayer(googleSat);
-                map.addLayer(cartoDark);
-            } else {
-                map.removeLayer(cartoDark);
-                map.addLayer(googleSat);
-            }
-        };
-
-        // --- CARGA DEL INVENTARIO, FILTRO Y ESTADÍSTICAS ---
         fetch('glaciares_invent.json')
             .then(res => res.json())
             .then(data => {
@@ -278,10 +480,8 @@
             })
             .catch(err => console.error("Error cargando glaciares_invent.json:", err));
 
-        // Función para limpiar, dibujar y calcular estadísticas
         function renderizarGlaciares(geoJsonData) {
             glaciaresLayer.clearLayers(); 
-            
             let cantidad = geoJsonData.features.length;
             let areaTotal = 0;
             
@@ -297,10 +497,7 @@
                     let lon = f.properties.longitud || f.properties.Longitud || f.properties.lon || 0;
                     let idLocal = f.properties.ID_local || f.properties.id_local || "S/D";
                     
-                    // Traducción didáctica a escala Estadio UNO
                     let cunaDeUno = areaNum > 0 ? (areaNum / 0.0071).toFixed(1) : "Calcular";
-
-                    // Enlace Google Earth Timelapse
                     let urlTimelapse = lat !== 0 ? `https://earth.google.com/web/@${lat},${lon},3000d,35y,0h,0t,0r` : "#";
 
                     l.bindPopup(`
@@ -330,10 +527,8 @@
             document.getElementById('txtAreaTotal').innerText = areaTotal.toLocaleString('es-AR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
         }
 
-        // Evento del selector de provincia
         document.getElementById('selectProvincia').onchange = function(e) {
             var provinciaSeleccionada = e.target.value;
-            
             if (!inventarioDataGlobal) return;
 
             if (provinciaSeleccionada === "todas") {
@@ -352,19 +547,14 @@
                     try {
                         var capaTemporal = L.geoJSON(geoJsonFiltrado);
                         map.fitBounds(capaTemporal.getBounds(), { padding: [40, 40] });
-                    } catch(err) {
-                        console.log("Error haciendo zoom:", err);
-                    }
+                    } catch(err) { console.log(err); }
                 }
             }
-            
             document.getElementById('checkGlaciares').checked = true;
             if(!map.hasLayer(glaciaresLayer)) map.addLayer(glaciaresLayer);
         };
 
-        // Checkbox de Visibilidad de Glaciares
         document.getElementById('checkGlaciares').onchange = (e) => e.target.checked ? map.addLayer(glaciaresLayer) : map.removeLayer(glaciaresLayer);
-
     </script>
 </body>
 </html>
