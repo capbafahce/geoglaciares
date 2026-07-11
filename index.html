@@ -310,15 +310,8 @@
         });
         var satelitalHibrido = L.layerGroup([esriSatelitalBase, ignLabelsOverlay]);
 
-        // --- NUEVA CAPA: CONTORNO DE ARGENTINA (LÍMITES WMS DEL IGN) ---
-        // Usamos una línea gris/oscura sutil que quede bien sobre cualquier fondo sin tapar los glaciares
-        var contornoArgentina = L.tileLayer.wms('https://wms.ign.gob.ar/geoserver/wms', {
-            layers: 'ign:linea_de_costa_coasta_line,ign:limite_politico_internacional',
-            format: 'image/png',
-            transparent: true,
-            version: '1.1.1',
-            attribution: '&copy; IGN Límite Oficial'
-        });
+        // --- CAPA DE CONTORNO NATIVO CORREGIDO (GEOJSON INFALIBLE) ---
+        var contornoArgentinaLayer = L.layerGroup();
 
         var limitesMapa = [
             [-56.0, -76.0], 
@@ -328,12 +321,41 @@
         var map = L.map('map', { 
             center: [-42.0, -71.0], 
             zoom: 5, 
-            layers: [satelitalHibrido, contornoArgentina], // Agregamos el contorno fijo desde el arranque
+            layers: [satelitalHibrido, contornoArgentinaLayer], // Se agrega al inicio de forma nativa
             maxBounds: limitesMapa,
             maxBoundsViscosity: 1.0,
             minZoom: 4,
             zoomControl: false 
         });
+
+        // Carga del GeoJSON perimetral desde un repositorio de límites públicos estables
+        fetch('https://raw.githubusercontent.com/datasets/geo-boundaries-world-110m/master/countries/ARG.geojson')
+            .then(res => res.json())
+            .then(geojsonData => {
+                L.geoJSON(geojsonData, {
+                    style: {
+                        color: "#cc0000",       // Rojo institucional a tono con la app
+                        weight: 2,              // Grosor para que resalte sobre el satelital
+                        fillOpacity: 0,         // Completamente transparente por dentro
+                        dashArray: "3, 6",      // Estilo de línea punteada elegante
+                        interactive: false      // Evita interferir con los clics en los glaciares
+                    }
+                }).addTo(contornoArgentinaLayer);
+                
+                // Nos aseguramos de mantener el orden correcto de superposición
+                forzarZIndexCapas();
+            })
+            .catch(err => console.error("Error cargando contorno de Argentina:", err));
+
+        // Auxiliar para ordenar las visualizaciones en profundidad
+        function forzarZIndexCapas() {
+            if (map.hasLayer(contornoArgentinaLayer)) {
+                contornoArgentinaLayer.eachLayer(l => { if(l.bringToFront) l.bringToFront(); });
+            }
+            if (typeof glaciaresLayer !== 'undefined' && map.hasLayer(glaciaresLayer)) {
+                glaciaresLayer.eachLayer(l => { if(l.bringToFront) l.bringToFront(); });
+            }
+        }
 
         // Eventos barra flotante básicos
         document.getElementById('btn-zoom-in').onclick = function() { map.zoomIn(); };
@@ -371,8 +393,7 @@
                     map.addLayer(argenmapGris);
                 }
                 
-                // Forzamos que el contorno nacional quede siempre arriba del mapa base recién cargado
-                contornoArgentina.bringToFront();
+                forzarZIndexCapas();
             };
         }
 
@@ -531,10 +552,7 @@
             document.getElementById('txtCantidad').innerText = cantidad.toLocaleString();
             document.getElementById('txtAreaTotal').innerText = areaTotal.toLocaleString('es-AR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
             
-            // Mantenemos los glaciares siempre flotando por encima del contorno base
-            glaciaresLayer.eachLayer(layer => {
-                if (layer.bringToFront) layer.bringToFront();
-            });
+            forzarZIndexCapas();
         }
 
         document.getElementById('selectProvincia').onchange = function(e) {
