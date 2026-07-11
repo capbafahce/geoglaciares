@@ -218,7 +218,7 @@
                 <div class="layer-control">
                     <label style="display: flex; align-items: center; cursor: pointer; width: 100%;">
                         <input type="checkbox" id="checkGlaciares" checked> 
-                        <span class="material-symbols-outlined icon-glaciar" style="margin-right: 8px;">layers</span> Cuerpos de Hielo
+                        <span class="material-symbols-outlined icon-glaciar" style="margin-right: 8px;">layers</span> Cuerpos de hielo
                     </label>
                 </div>
 
@@ -297,6 +297,12 @@
 
     <script>
         // Capas de Mapas Base
+           var argenmap = L.tileLayer('https://wms.ign.gob.ar/geoserver/gwc/service/tms/1.0.0/capabaseargenmap@EPSG%3A3857@png/{z}/{x}/{y}.png', {
+        tms: true,
+        maxZoom: 20,
+        attribution: '&copy; <a href="http://www.ign.gob.ar/AreaServicios/Argenmap/Introduccion" target="_blank">Instituto Geográfico Nacional</a>'
+        });
+        
         var googleSat = L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
             maxZoom: 20, subdomains: ['mt0','mt1','mt2','mt3'],
             attribution: 'Map data &copy; Google'
@@ -306,7 +312,6 @@
             attribution: '&copy; OpenStreetMap &copy; CARTO',
             subdomains: 'abcd', maxZoom: 20
         });
-
         var limitesMapa = [
             [-56.0, -76.0], 
             [-21.0, -62.0]  
