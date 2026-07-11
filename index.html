@@ -93,7 +93,7 @@
         }
         .icon-glaciar { color: #00e5ff; }
 
-        /* BARRA LATERAL DE HERRAMIENTAS FLOTANTE - ESTILO EDLP */
+        /* BARRA LATERAL DE HERRAMIENTAS FLOTANTE */
         .map-toolbar {
             position: absolute;
             top: 20px;
@@ -105,7 +105,7 @@
             align-items: center;
         }
 
-        /* Grupo de Zoom (Fondo Blanco, Icono Rojo Pincha) */
+        /* Grupo de Zoom */
         .zoom-group {
             display: flex;
             flex-direction: column;
@@ -131,7 +131,7 @@
         .btn-toolbar-zoom:hover { background-color: #cc0000; color: white; }
         .btn-toolbar-zoom:first-child { border-bottom: 1px solid #eeeeee; }
 
-        /* Botones de acción generales (Fondo Rojo, Iconos Blancos) */
+        /* Botones de acción generales */
         .btn-toolbar-action {
             width: 44px;
             height: 44px;
@@ -149,7 +149,6 @@
         }
         .btn-toolbar-action:hover { transform: scale(1.1); background-color: #a30000; }
         
-        /* Estado activo para el botón de medición */
         .btn-toolbar-action.active {
             background-color: #34495e;
             border-color: #34495e;
@@ -295,13 +294,13 @@
             attribution: '&copy; <a href="http://www.ign.gob.ar" target="_blank">IGN Argentina</a>'
         });
         
-        // 2. Argenmap Gris (Oficial IGN) - Reemplaza a CartoDark
+        // 2. Argenmap Gris (Oficial IGN)
         var argenmapGris = L.tileLayer('https://wms.ign.gob.ar/geoserver/gwc/service/tms/1.0.0/argenmap_gris@EPSG%3A3857@png/{z}/{x}/{y}.png', {
             tms: true, maxZoom: 20,
             attribution: '&copy; <a href="http://www.ign.gob.ar" target="_blank">IGN Argentina</a>'
         });
 
-        // 3. Satelital Híbrido Infalible: Base de Esri + Capa de topónimos de Argenmap encima
+        // 3. Satelital Híbrido: Base de Esri + Capa de topónimos de Argenmap
         var esriSatelitalBase = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
             maxZoom: 18,
             attribution: 'Tiles &copy; Esri &mdash; Fuente: IGN Argentina'
@@ -309,8 +308,17 @@
         var ignLabelsOverlay = L.tileLayer('https://wms.ign.gob.ar/geoserver/gwc/service/tms/1.0.0/capabaseargenmap_satelite@EPSG%3A3857@png/{z}/{x}/{y}.png', {
             tms: true, maxZoom: 20
         });
-        // Agrupamos la imagen real fluida con los límites e Islas Malvinas del IGN
         var satelitalHibrido = L.layerGroup([esriSatelitalBase, ignLabelsOverlay]);
+
+        // --- NUEVA CAPA: CONTORNO DE ARGENTINA (LÍMITES WMS DEL IGN) ---
+        // Usamos una línea gris/oscura sutil que quede bien sobre cualquier fondo sin tapar los glaciares
+        var contornoArgentina = L.tileLayer.wms('https://wms.ign.gob.ar/geoserver/wms', {
+            layers: 'ign:linea_de_costa_coasta_line,ign:limite_politico_internacional',
+            format: 'image/png',
+            transparent: true,
+            version: '1.1.1',
+            attribution: '&copy; IGN Límite Oficial'
+        });
 
         var limitesMapa = [
             [-56.0, -76.0], 
@@ -320,7 +328,7 @@
         var map = L.map('map', { 
             center: [-42.0, -71.0], 
             zoom: 5, 
-            layers: [satelitalHibrido], // Inicializa con el satelital híbrido que funciona perfecto
+            layers: [satelitalHibrido, contornoArgentina], // Agregamos el contorno fijo desde el arranque
             maxBounds: limitesMapa,
             maxBoundsViscosity: 1.0,
             minZoom: 4,
@@ -345,7 +353,7 @@
             menuBasemaps.style.display = 'none';
         });
 
-        // Conmutador dinámico corregido para Argenmap, Satelital y Gris
+        // Conmutador dinámico
         var opcionesMapa = document.getElementsByClassName('basemap-option');
         for (var i = 0; i < opcionesMapa.length; i++) {
             opcionesMapa[i].onclick = function(e) {
@@ -362,6 +370,9 @@
                 } else if (valorSeleccionado === "gris") {
                     map.addLayer(argenmapGris);
                 }
+                
+                // Forzamos que el contorno nacional quede siempre arriba del mapa base recién cargado
+                contornoArgentina.bringToFront();
             };
         }
 
@@ -519,6 +530,11 @@
 
             document.getElementById('txtCantidad').innerText = cantidad.toLocaleString();
             document.getElementById('txtAreaTotal').innerText = areaTotal.toLocaleString('es-AR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            
+            // Mantenemos los glaciares siempre flotando por encima del contorno base
+            glaciaresLayer.eachLayer(layer => {
+                if (layer.bringToFront) layer.bringToFront();
+            });
         }
 
         document.getElementById('selectProvincia').onchange = function(e) {
