@@ -168,7 +168,7 @@
             flex-direction: column;
             padding: 6px 0;
             width: 130px;
-            z-index: 1005; /* Asegura que flote por sobre el contenedor de mapa */
+            z-index: 1005;
         }
         .basemap-option {
             padding: 10px 14px;
@@ -273,7 +273,7 @@
                     <div class="basemap-menu" id="menu-basemaps">
                         <div class="basemap-option" data-value="argenmap">ArgenMap</div>
                         <div class="basemap-option" data-value="satelital">Satelital</div>
-                        <div class="basemap-option" data-value="oscuro">Oscuro</div>
+                        <div class="basemap-option" data-value="gris">ArgenMap Gris</div>
                     </div>
                 </button>
                 
@@ -289,23 +289,28 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
-        // Capas de Mapas Base
+        // 1. Argenmap Común (Oficial IGN)
         var argenmap = L.tileLayer('https://wms.ign.gob.ar/geoserver/gwc/service/tms/1.0.0/capabaseargenmap@EPSG%3A3857@png/{z}/{x}/{y}.png', {
-            tms: true,
-            maxZoom: 20,
-            attribution: '&copy; <a href="http://www.ign.gob.ar/AreaServicios/Argenmap/Introduccion" target="_blank">Instituto Geográfico Nacional</a>'
+            tms: true, maxZoom: 20,
+            attribution: '&copy; <a href="http://www.ign.gob.ar" target="_blank">IGN Argentina</a>'
         });
         
-        var ignSatelital = L.tileLayer('https://wms.ign.gob.ar/geoserver/gwc/service/tms/1.0.0/capabaseargenmap_satelite@EPSG%3A3857@png/{z}/{x}/{y}.png', {
-            tms: true,
-            maxZoom: 20,
+        // 2. Argenmap Gris (Oficial IGN) - Reemplaza a CartoDark
+        var argenmapGris = L.tileLayer('https://wms.ign.gob.ar/geoserver/gwc/service/tms/1.0.0/argenmap_gris@EPSG%3A3857@png/{z}/{x}/{y}.png', {
+            tms: true, maxZoom: 20,
             attribution: '&copy; <a href="http://www.ign.gob.ar" target="_blank">IGN Argentina</a>'
         });
 
-        var cartoDark = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; OpenStreetMap &copy; CARTO',
-            subdomains: 'abcd', maxZoom: 20
+        // 3. Satelital Híbrido Infalible: Base de Esri + Capa de topónimos de Argenmap encima
+        var esriSatelitalBase = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            maxZoom: 18,
+            attribution: 'Tiles &copy; Esri &mdash; Fuente: IGN Argentina'
         });
+        var ignLabelsOverlay = L.tileLayer('https://wms.ign.gob.ar/geoserver/gwc/service/tms/1.0.0/capabaseargenmap_satelite@EPSG%3A3857@png/{z}/{x}/{y}.png', {
+            tms: true, maxZoom: 20
+        });
+        // Agrupamos la imagen real fluida con los límites e Islas Malvinas del IGN
+        var satelitalHibrido = L.layerGroup([esriSatelitalBase, ignLabelsOverlay]);
 
         var limitesMapa = [
             [-56.0, -76.0], 
@@ -315,7 +320,7 @@
         var map = L.map('map', { 
             center: [-42.0, -71.0], 
             zoom: 5, 
-            layers: [ignSatelital], // Arranca por defecto con el Satelital oficial del IGN
+            layers: [satelitalHibrido], // Inicializa con el satelital híbrido que funciona perfecto
             maxBounds: limitesMapa,
             maxBoundsViscosity: 1.0,
             minZoom: 4,
@@ -340,24 +345,22 @@
             menuBasemaps.style.display = 'none';
         });
 
-        // Control dinámico de cambio de capas base corregido
+        // Conmutador dinámico corregido para Argenmap, Satelital y Gris
         var opcionesMapa = document.getElementsByClassName('basemap-option');
         for (var i = 0; i < opcionesMapa.length; i++) {
             opcionesMapa[i].onclick = function(e) {
                 var valorSeleccionado = this.getAttribute('data-value');
                 
-                // Removemos todas las bases activas para evitar superposiciones de memoria
                 map.removeLayer(argenmap);
-                map.removeLayer(ignSatelital);
-                map.removeLayer(cartoDark);
+                map.removeLayer(satelitalHibrido);
+                map.removeLayer(argenmapGris);
                 
-                // Cargamos la seleccionada
                 if (valorSeleccionado === "argenmap") {
                     map.addLayer(argenmap);
                 } else if (valorSeleccionado === "satelital") {
-                    map.addLayer(ignSatelital);
-                } else if (valorSeleccionado === "oscuro") {
-                    map.addLayer(cartoDark);
+                    map.addLayer(satelitalHibrido);
+                } else if (valorSeleccionado === "gris") {
+                    map.addLayer(argenmapGris);
                 }
             };
         }
@@ -387,13 +390,8 @@
             var latlng = e.latlng;
             puntosMedicion.push(latlng);
 
-            // Crear un pequeño marcador circular en el punto cliqueado
             var marcador = L.circleMarker(latlng, {
-                radius: 4,
-                color: '#2c3e50',
-                fillColor: '#ffffff',
-                fillOpacity: 1,
-                weight: 2
+                radius: 4, color: '#2c3e50', fillColor: '#ffffff', fillOpacity: 1, weight: 2
             }).addTo(map);
             marcadoresMedicion.push(marcador);
 
@@ -404,20 +402,15 @@
                     lineaMedicion.setLatLngs(puntosMedicion);
                 }
 
-                // Calcular la distancia acumulada total usando la fórmula geodésica integrada de Leaflet
                 var distanciaTotalMetros = 0;
                 for (var i = 0; i < puntosMedicion.length - 1; i++) {
                     distanciaTotalMetros += puntosMedicion[i].distanceTo(puntosMedicion[i+1]);
                 }
                 var distanciaKm = (distanciaTotalMetros / 1000).toFixed(2);
 
-                // Actualizar o crear tooltip flotante en el último vértice insertado
                 if (!tooltipFlotante) {
                     tooltipFlotante = L.tooltip({
-                        permanent: true,
-                        direction: 'top',
-                        className: 'medicion-tooltip',
-                        offset: [0, -5]
+                        permanent: true, direction: 'top', className: 'medicion-tooltip', offset: [0, -5]
                     });
                 }
                 tooltipFlotante.setLatLng(latlng).setContent("Distancia: " + distanciaKm + " km").addTo(map);
@@ -428,7 +421,6 @@
             modoMedicionActivo = false;
             btnMeasure.classList.remove('active');
             document.getElementById('map').classList.remove('medicion-activa');
-            
             map.off('click', mapearClicMedicion);
 
             if (lineaMedicion) { map.removeLayer(lineaMedicion); lineaMedicion = null; }
@@ -437,7 +429,6 @@
             marcadoresMedicion = [];
             puntosMedicion = [];
         }
-
 
         // --- CARGA DEL INVENTARIO, FILTRO Y ESTADÍSTICAS ---
         var glaciaresLayer = L.layerGroup().addTo(map);
@@ -475,8 +466,7 @@
                 var selectDropdown = document.getElementById('selectProvincia');
                 Array.from(provinciasSet).sort().forEach(prov => {
                     var option = document.createElement('option');
-                    option.value = prov;
-                    option.textContent = prov;
+                    option.value = prov; option.textContent = prov;
                     selectDropdown.appendChild(option);
                 });
 
