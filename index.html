@@ -278,8 +278,9 @@
                 <button class="btn-toolbar-action" id="btn-basemap" title="Cambiar Mapa Base">
                     <span class="material-symbols-outlined">map</span>
                     <div class="basemap-menu" id="menu-basemaps">
+                        <div class="basemap-optiom" data-value="argenmap">ArgenMap</div>
                         <div class="basemap-option" data-value="satelital">Satelital</div>
-                        <div class="basemap-option" data-value="oscuro">Modo Oscuro</div>
+                        <div class="basemap-option" data-value="oscuro">Oscuro</div>
                     </div>
                 </button>
                 
@@ -303,10 +304,11 @@
         attribution: '&copy; <a href="http://www.ign.gob.ar/AreaServicios/Argenmap/Introduccion" target="_blank">Instituto Geográfico Nacional</a>'
         });
         
-        var googleSat = L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
-            maxZoom: 20, subdomains: ['mt0','mt1','mt2','mt3'],
-            attribution: 'Map data &copy; Google'
-        });
+          var ignSatelital = L.tileLayer('https://wms.ign.gob.ar/geoserver/gwc/service/tms/1.0.0/capabaseargenmap_satelite@EPSG%3A3857@png/{z}/{x}/{y}.png', {
+            tms: true,
+    maxZoom: 20,
+    attribution: '&copy; <a href="http://www.ign.gob.ar" target="_blank">IGN Argentina</a>'
+});
 
         var cartoDark = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
             attribution: '&copy; OpenStreetMap &copy; CARTO',
@@ -317,15 +319,15 @@
             [-21.0, -62.0]  
         ];
 
-        var map = L.map('map', { 
-            center: [-42.0, -71.0], 
-            zoom: 5, 
-            layers: [googleSat],
-            maxBounds: limitesMapa,
-            maxBoundsViscosity: 1.0,
-            minZoom: 4,
-            zoomControl: false 
-        });
+  var map = L.map('map', { 
+    center: [-42.0, -71.0], 
+    zoom: 5, 
+    layers: [ignSatelital],
+    maxBounds: limitesMapa,
+    maxBoundsViscosity: 1.0,
+    minZoom: 4,
+    zoomControl: false 
+});
 
         // Eventos barra flotante básicos
         document.getElementById('btn-zoom-in').onclick = function() { map.zoomIn(); };
