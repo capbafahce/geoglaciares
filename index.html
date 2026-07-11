@@ -292,7 +292,6 @@
             tms: true, maxZoom: 20,
             attribution: '&copy; <a href="http://www.ign.gob.ar" target="_blank">IGN Argentina</a>'
         });
-        
       
         // 3. Satelital Híbrido: Base de Esri + Capa de topónimos de Argenmap
         var esriSatelitalBase = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
@@ -369,28 +368,25 @@
             menuBasemaps.style.display = 'none';
         });
 
-        // Conmutador dinámico
+   // Conmutador dinámico corregido
         var opcionesMapa = document.getElementsByClassName('basemap-option');
         for (var i = 0; i < opcionesMapa.length; i++) {
             opcionesMapa[i].onclick = function(e) {
                 var valorSeleccionado = this.getAttribute('data-value');
                 
+                // Removemos únicamente las capas base existentes
                 map.removeLayer(argenmap);
                 map.removeLayer(satelitalHibrido);
-                map.removeLayer(argenmapGris);
                 
                 if (valorSeleccionado === "argenmap") {
                     map.addLayer(argenmap);
                 } else if (valorSeleccionado === "satelital") {
                     map.addLayer(satelitalHibrido);
-                } else if (valorSeleccionado === "gris") {
-                    map.addLayer(argenmapGris);
                 }
                 
                 forzarZIndexCapas();
             };
         }
-
         // --- LÓGICA DE LA REGLA DE MEDICIÓN NATIVA ---
         var modoMedicionActivo = false;
         var puntosMedicion = [];
