@@ -272,8 +272,7 @@
                     <div class="basemap-menu" id="menu-basemaps">
                         <div class="basemap-option" data-value="argenmap">ArgenMap</div>
                         <div class="basemap-option" data-value="satelital">Satelital</div>
-                        <div class="basemap-option" data-value="gris">ArgenMap Gris</div>
-                    </div>
+                                  </div>
                 </button>
                 
                 <button class="btn-toolbar-action" id="btn-measure" title="Medir distancia de punto a punto">
@@ -294,12 +293,7 @@
             attribution: '&copy; <a href="http://www.ign.gob.ar" target="_blank">IGN Argentina</a>'
         });
         
-        // 2. Argenmap Gris (Oficial IGN)
-        var argenmapGris = L.tileLayer('https://wms.ign.gob.ar/geoserver/gwc/service/tms/1.0.0/argenmap_gris@EPSG%3A3857@png/{z}/{x}/{y}.png', {
-            tms: true, maxZoom: 20,
-            attribution: '&copy; <a href="http://www.ign.gob.ar" target="_blank">IGN Argentina</a>'
-        });
-
+      
         // 3. Satelital Híbrido: Base de Esri + Capa de topónimos de Argenmap
         var esriSatelitalBase = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
             maxZoom: 18,
@@ -321,7 +315,7 @@
         var map = L.map('map', { 
             center: [-42.0, -71.0], 
             zoom: 5, 
-            layers: [satelitalHibrido, contornoArgentinaLayer], // Se agrega al inicio de forma nativa
+            layers: [argenmap],
             maxBounds: limitesMapa,
             maxBoundsViscosity: 1.0,
             minZoom: 4,
